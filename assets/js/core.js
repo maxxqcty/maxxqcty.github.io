@@ -44,6 +44,12 @@
     try { lenis = new window.Lenis({ autoRaf: false, anchors: true }); } catch (e) { lenis = null; }
   }
 
+  // no scrolling behind the loading curtain
+  if (lenis && root.classList.contains('loading')) {
+    lenis.stop();
+    (window.MAE_shown || Promise.resolve()).then(() => lenis.start());
+  }
+
   /* layout signal: anything that can move or resize page content asks modules to re-measure.
      Handlers run together at the start of the next frame, in registration order. */
   const layoutHandlers = [];
@@ -80,6 +86,8 @@
     tokens: () => tokens || (readTokens(), tokens),
     onFrame: fn => { frameHandlers.push(fn); },
     onLayout: fn => { layoutHandlers.push(fn); },
+    /* runs fn once the page is visible: after the loading curtain lifts, or at once without one */
+    whenShown: fn => { (window.MAE_shown || Promise.resolve()).then(fn); },
     /* { on } stays true while the element is on screen (always true without IntersectionObserver) */
     inView(el) {
       const state = { on: true };

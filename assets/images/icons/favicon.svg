@@ -1,4 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0A0A0A"/>
-  <path d="M15 46V18h6l11 15 11-15h6v28h-7V30l-10 13-10-13v16z" fill="#A3E635"/>
+<!-- Logo: "MA". Two peaks make the M; the taller right peak is the A, and a lime
+     four-point star sits where its crossbar would be. Drawn on a black tile.
+     The same drawing is inlined in the header and the loader (index.html) so it can animate. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="12 1 100 100">
+  <title>Maximilian Axel Enolpe</title>
+  <rect x="12" y="1" width="100" height="100" rx="22" fill="#0A0A0A"/>
+  <g transform="translate(62 51) scale(.8) translate(-62 -51)">
+    <clipPath id="c"><rect width="124" height="88"/></clipPath>
+    <g clip-path="url(#c)" fill="none" stroke="#FAFAFA" stroke-width="13" stroke-miterlimit="10">
+      <path class="logo-m" d="M26.1 96 46 40 65.9 96" pathLength="1"/>
+      <path class="logo-a" d="M54 96 76 34 98 96" pathLength="1"/>
+    </g>
+    <path class="logo-star" d="M76 44Q77.8 62.9 93 64.5Q77.8 66.1 76 85Q74.2 66.1 59 64.5Q74.2 62.9 76 44Z" fill="#A3E635" stroke="#0A0A0A" stroke-width="2.2" stroke-linejoin="round"/>
+  </g>
 </svg>

@@ -380,7 +380,8 @@
   }
 
   /* ---------- per frame ---------- */
-  const t0 = performance.now();
+  let t0 = performance.now();   // start of the tick draw-in; restarted when the loading curtain lifts
+  App.whenShown(() => { t0 = performance.now(); });
   let lastY = scrollY, vel = 0, lastT = t0, lastSeenY = scrollY, restSince = t0;
   let shownHoverY = null, shownHoverWord = -1, snapTried = false;
   const INTRO_END = 250 + 100 * INTRO_STAGGER + INTRO_DUR + 100;   // ms until the last tick has drawn in

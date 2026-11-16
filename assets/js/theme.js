@@ -19,6 +19,14 @@
     if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
   } catch (e) { /* storage blocked: fall back to the OS setting */ }
 
+  /* Loading curtain (loader.css, loader.js): switched on here, before first paint, so the
+     page never flashes ahead of it. Skipped with reduced motion. The timeout is a safety
+     net: if loader.js never runs, the page is released anyway. */
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    root.classList.add('loading');
+    setTimeout(() => root.classList.remove('loading'), 8000);
+  }
+
   function nextTheme() {
     const isDark = root.dataset.theme
       ? root.dataset.theme === 'dark'

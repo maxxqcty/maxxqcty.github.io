@@ -11,12 +11,12 @@
   const easeOut = x => 1 - Math.pow(1 - x, 3);
 
   figures.forEach(el => { el.textContent = '0'; });
-  const t0 = performance.now() + DELAY;
+  let t0 = Infinity;   // set when the page is shown (after the loading curtain)
 
   function step(now) {
     const k = Math.min(1, Math.max(0, (now - t0) / DURATION));
     figures.forEach(el => { el.textContent = Math.round(easeOut(k) * +el.dataset.count); });
     if (k < 1) requestAnimationFrame(step);
   }
-  requestAnimationFrame(step);
+  App.whenShown(() => { t0 = performance.now() + DELAY; requestAnimationFrame(step); });
 })(window.MAE);

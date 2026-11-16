@@ -30,10 +30,12 @@ assets/
       media.css                "Off the clock": favourite films (posters) and music (covers)
       contact.css              headline, message form, details panel (email + copy, profiles, local time), toast
       hud.css                  cursor coordinates, scroll ruler (hides the native scrollbar)
+      loader.css               loading curtain: the logo draws itself, a lime diamond grows from its star, the curtain lifts
       motion.css               staggered scroll reveal, word reveal, hover touches (tilt glare, chips, rows)
   js/
     theme.js                   restores saved theme before paint; toggle reveals the new theme as a circle (loads in <head>)
     vendor/lenis.min.js        Lenis 1.3.4, smooth scrolling (the only library; vendored so the site works offline)
+    loader.js                  runs the loading curtain (loads in <body>, right after its markup)
     core.js                    window.MAE: pointer state, theme colours, Lenis, per-frame state (App.frame),
                                layout signal (App.onLayout), one shared animation loop
     modules/
@@ -55,7 +57,7 @@ assets/
     main.js                    starts the loop (loads last)
   images/
     portrait/portrait-600.webp, portrait-1000.webp   transparent cutout, responsive sizes
-    icons/favicon.svg
+    icons/logo.svg, favicon.svg                      the MA logo (same drawing; also inlined in the header and the loader)
 source/                        originals, not loaded by the site; do not deploy
   documents/resume.pdf
   photos/profile-original.png             first studio photo (grey background)

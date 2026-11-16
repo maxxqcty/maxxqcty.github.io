@@ -1,0 +1,47 @@
+/* ==========================================================================
+   Loader: the logo builds itself on a black screen while the page loads, then
+   becomes the transition into the site (theme.js adds html.loading before
+   first paint; loader.js decides when to leave).
+   1. build   the two peaks of the M draw themselves, then the lime star pops into the A
+   2. wait    if the page is still loading, the star breathes
+   3. leave   a lime diamond grows out of the star until it fills the screen, then
+              the whole curtain lifts and the page's own intro starts beneath it
+   Without JavaScript, or with reduced motion, the loader never shows.
+   Only transform-type properties, opacity and stroke-dashoffset are animated.
+   ========================================================================== */
+
+.loader { display: none; }
+html.loading .loader, html.loaded .loader {
+  display: grid; place-items: center; position: fixed; inset: 0; z-index: 100; overflow: hidden;
+  background: #0A0A0A;
+}
+
+/* ---------- 1. build ---------- */
+.loader { --logo: clamp(130px, 15vw, 190px); }
+.loader-logo { width: var(--logo); height: auto; overflow: visible; }
+.loader-logo .logo-m, .loader-logo .logo-a { stroke-dasharray: 1; animation: loader-draw .7s cubic-bezier(.65, 0, .35, 1) both; }
+.loader-logo .logo-a { animation-delay: .18s; }
+.loader-logo .logo-star { transform-box: fill-box; transform-origin: center; animation: loader-star .6s var(--ease) .62s both; }
+@keyframes loader-draw { from { stroke-dashoffset: 1; } }
+@keyframes loader-star { from { transform: scale(0) rotate(-90deg); } }
+
+/* ---------- 2. wait ---------- */
+.loader.is-waiting .logo-star { animation: loader-breathe .9s ease-in-out infinite alternate; }
+@keyframes loader-breathe { to { transform: scale(.72); } }
+
+/* ---------- 3. leave ---------- */
+/* a square turned 45 degrees (the star's own shape, filled out), large enough to cover any screen */
+.loader-diamond {
+  position: absolute; left: 50%; top: 50%; width: 150vmax; height: 150vmax; margin: -75vmax 0 0 -75vmax;
+  background: #A3E635; rotate: 45deg; scale: 0;
+  /* centred on the star, which sits right of and below the logo's middle */
+  translate: calc(var(--logo) * .14) calc(var(--logo) * .135);
+}
+html.loaded .loader { pointer-events: none; animation: loader-lift .8s cubic-bezier(.76, 0, .24, 1) .5s forwards; }
+html.loaded .loader-diamond { animation: loader-grow .65s cubic-bezier(.7, 0, .3, 1) forwards; }
+@keyframes loader-grow { to { scale: 1; } }
+@keyframes loader-lift { to { transform: translateY(-101%); } }
+
+/* the page's intro animations wait behind the curtain and start as it lifts */
+html.loading body > :not(.loader), html.loading body > :not(.loader) *,
+html.loading body > :not(.loader) *::before, html.loading body > :not(.loader) *::after { animation-play-state: paused !important; }
