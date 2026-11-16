@@ -12,7 +12,7 @@
 /* accent fill wipes up from the bottom on hover */
 .row a::before {
   content: ""; position: absolute; inset: 0 calc(var(--gutter) * -.5); z-index: -1;
-  background: var(--accent); transform: scaleY(0); transform-origin: bottom; transition: transform .55s var(--ease);
+  background: var(--lime); transform: scaleY(0); transform-origin: bottom; transition: transform .55s var(--ease);
 }
 .row a:hover::before, .row a:focus-visible::before { transform: scaleY(1); transform-origin: top; }
 .row a:hover, .row a:focus-visible,

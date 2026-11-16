@@ -45,7 +45,7 @@
   background: var(--ink); color: var(--paper); font: 500 1.05rem var(--f-body); text-decoration: none; cursor: pointer;
   transition: transform .5s var(--ease), background .3s, color .3s;
 }
-.mag:hover, .mag:focus-visible { background: var(--accent); color: var(--on-accent); }
+.mag:hover, .mag:focus-visible { background: var(--lime); color: var(--on-accent); }
 .mag:disabled { opacity: .6; cursor: progress; }
 .mag-inner { display: inline-flex; gap: 12px; align-items: center; min-width: 0; transition: transform .5s var(--ease); }
 .mag-inner svg { flex: none; transition: transform .45s var(--ease); }

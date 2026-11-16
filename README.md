@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
   <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
-  <img src="https://img.shields.io/badge/No_build_step-2B44E8?style=for-the-badge" alt="No build step">
+  <img src="https://img.shields.io/badge/No_build_step-000000?style=for-the-badge" alt="No build step">
 </p>
 
 <p align="center">
@@ -48,7 +48,8 @@ This repository is my personal portfolio: a single web page that introduces me, 
 ## 🎨 Little details
 
 - 🌗 **Light and dark mode**: follows your system, with a toggle in the corner
-- 🫧 **Liquid cursor**: a soft blob that follows your mouse and reacts to what it's over
+- 🧈 **Smooth scrolling**: the page glides with the wheel, the nav links and the scroll ruler
+- ✨ **Small interactions**: magnetic buttons, tilting posters, text that rises into place
 - 📏 **Scroll ruler**: a measuring rail on the right edge, with section names that fly into place
 - 📐 **Drafting-table background**: grid lines and sketches that draw themselves as you scroll
 - 📱 **Works on phones**: the layout adapts to any screen size

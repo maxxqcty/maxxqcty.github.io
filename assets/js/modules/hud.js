@@ -7,9 +7,12 @@
   if (!coords) return;
 
   const pad = n => String(Math.max(0, Math.round(n))).padStart(4, '0');
+  let shown = '';
 
   App.onFrame(() => {
-    const { x, y } = App.pointer;
-    coords.textContent = `X ${pad(x)} · Y ${pad(y + scrollY)}`;
+    const f = App.frame;
+    if (!f.moved && !f.scrolled) return;
+    const text = `X ${pad(App.pointer.x)} · Y ${pad(App.pointer.y + f.scrollY)}`;
+    if (text !== shown) coords.textContent = shown = text;
   });
 })(window.MAE);

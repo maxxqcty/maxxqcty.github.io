@@ -30,10 +30,12 @@ assets/
       media.css                "Off the clock": favourite films (posters) and music (covers)
       contact.css              headline, message form, details panel (email + copy, profiles, local time), toast
       hud.css                  cursor coordinates, scroll ruler (hides the native scrollbar)
-      cursor.css               liquid cursor
+      motion.css               staggered scroll reveal, word reveal, hover touches (tilt glare, chips, rows)
   js/
     theme.js                   restores saved theme before paint; toggle reveals the new theme as a circle (loads in <head>)
-    core.js                    window.MAE: pointer state, theme colours, one shared animation loop
+    vendor/lenis.min.js        Lenis 1.3.4, smooth scrolling (the only library; vendored so the site works offline)
+    core.js                    window.MAE: pointer state, theme colours, Lenis, per-frame state (App.frame),
+                               layout signal (App.onLayout), one shared animation loop
     modules/
       grid.js                  repeats the grid columns out to the window edges
       background.js            drafting layer: column pulses, compass arcs, marks, node graph, notation
@@ -48,8 +50,8 @@ assets/
       work.js                  preview card + thumbnails
       languages.js             hover tooltip on the language bars
       contact.js               magnetic Send button, message form validation, copy email, toast
-      reveal.js                slide-up as sections enter
-      cursor.js                liquid blob cursor (tuning constants at the top)
+      motion.js                word-by-word reveals, label scramble, magnetic buttons, poster tilt, current nav link
+      reveal.js                fade-and-slide as sections enter, staggered for rows arriving together
     main.js                    starts the loop (loads last)
   images/
     portrait/portrait-600.webp, portrait-1000.webp   transparent cutout, responsive sizes
@@ -73,7 +75,6 @@ They are plain `defer` scripts rather than ES modules because ES modules are blo
 - `href`: repo or demo link
 - `data-art`: which drawing to show (`seats`, `papers`, `bst`, `avl`, `table`), or add a new function to `art` in `assets/js/modules/project-art.js`
 - `data-caption`: text on the preview card
-- `data-cursor`: label on the cursor blob, e.g. `Code ↗` or `Demo ↗`
 
 **Update the language figures.** The numbers in the Languages section are a snapshot. To refresh them, sum `gh api repos/maxxqcty/<repo>/languages` over your non-fork repos, keep the programming languages, and set each row's percentage text, `--share`, `data-bytes` and `data-repos`. Each language and tool has an inline logo from [Simple Icons](https://simpleicons.org) (CC0): for a new one, copy the `<path d>` from `https://cdn.jsdelivr.net/npm/simple-icons/icons/<slug>.svg` into an `<svg class="lang-icon">` (rows) or `<svg class="tool-icon">` (chips).
 
@@ -89,4 +90,6 @@ python -c "from PIL import Image; im=Image.open('source/photos/profile-transpare
 
 **Connect the message form.** The form in the Contact section validates input but does not send anything yet. To deliver messages, replace `sendMessage()` in `assets/js/modules/contact.js` with a request to a form service (for example a `fetch()` POST to Web3Forms or Formspree) that resolves when the message is accepted. Until then, submitting a valid form tells the visitor to email the address shown instead.
 
-**Tune the cursor.** Constants at the top of `assets/js/modules/cursor.js`: blob sizes per state, tail length, spring and damping, tether distance, magnet strength.
+**Tune the scrolling.** Smooth scrolling is Lenis, created in `assets/js/core.js` (`new Lenis({ ... })`); pass `lerp` (default `0.1`, lower is floatier) or `wheelMultiplier` there. Remove the `lenis.min.js` script tag to go back to native scrolling; everything else keeps working.
+
+**Keep it smooth.** Frame handlers (`App.onFrame`) must not measure the page. Measure inside `App.onLayout` and cache, read scroll and viewport size from `App.frame`, and return early when nothing changed.

@@ -54,14 +54,25 @@
     }));
   }
 
+  /* Runs on the shared layout signal. The canvas is only resized when the viewport
+     changed, and the scene is only re-seeded when the width or the grid columns changed:
+     a height-only change (a phone's URL bar sliding away) keeps everything in place. */
+  let seededFor = '';
   function resize() {
     const dpr = Math.min(2, devicePixelRatio || 1);
-    W = innerWidth; H = innerHeight;
-    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = innerWidth, h = innerHeight;
+    const pw = Math.round(w * dpr), ph = Math.round(h * dpr);
+    const sized = canvas.width !== pw || canvas.height !== ph;
+    W = w; H = h;
+    if (sized) {
+      canvas.width = pw; canvas.height = ph;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
     measureColumns();
-    seed();
-    if (App.reduce) draw(0);
+    const sig = W + '|' + cols.join();
+    const reseed = sig !== seededFor;
+    if (reseed) { seededFor = sig; seed(); }
+    if (App.reduce && (sized || reseed)) draw(0);
   }
 
   /* wraps a parallax-shifted coordinate so elements loop instead of leaving the screen */
@@ -70,7 +81,7 @@
   function draw(t) {
     const c = App.tokens();
     const dt = Math.min(.05, t - lastT || .016); lastT = t;
-    const sy = scrollY;
+    const sy = App.frame.scrollY;
     ctx.clearRect(0, 0, W, H);
     ctx.lineCap = 'round';
 
@@ -161,11 +172,7 @@
     ctx.globalAlpha = 1;
   }
 
-  let resizeTimer;
-  addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
-  // wait for fonts and the grid's own layout before measuring columns
-  (document.fonts?.ready || Promise.resolve()).then(resize);
-  resize();
+  App.onLayout(resize);   // also runs before the first frame
 
   App.onFrame(t => { if (!App.reduce) draw(t); });
   /* a theme change re-colours the still frame too */

@@ -11,10 +11,12 @@
 <meta property="og:image" content="assets/images/portrait/portrait-1000.webp">
 <link rel="icon" href="assets/images/icons/favicon.svg" type="image/svg+xml">
 
-<!-- fonts -->
+<!-- fonts: loaded without blocking the first paint; text shows in the fallback faces until they arrive -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
 
 <!-- styles: tokens → base → layout → components -->
 <link rel="stylesheet" href="assets/css/tokens.css">
@@ -30,12 +32,13 @@
 <link rel="stylesheet" href="assets/css/components/media.css">
 <link rel="stylesheet" href="assets/css/components/contact.css">
 <link rel="stylesheet" href="assets/css/components/hud.css">
-<link rel="stylesheet" href="assets/css/components/cursor.css">
+<link rel="stylesheet" href="assets/css/components/motion.css">
 
 <!-- theme runs before paint so the saved theme never flashes -->
 <script src="assets/js/theme.js"></script>
 
-<!-- behaviour: core first, then modules, then main starts the loop -->
+<!-- behaviour: Lenis (smooth scrolling), core, then modules, then main starts the loop -->
+<script src="assets/js/vendor/lenis.min.js" defer></script>
 <script src="assets/js/core.js" defer></script>
 <script src="assets/js/modules/grid.js" defer></script>
 <script src="assets/js/modules/background.js" defer></script>
@@ -49,8 +52,8 @@
 <script src="assets/js/modules/work.js" defer></script>
 <script src="assets/js/modules/languages.js" defer></script>
 <script src="assets/js/modules/contact.js" defer></script>
+<script src="assets/js/modules/motion.js" defer></script>
 <script src="assets/js/modules/reveal.js" defer></script>
-<script src="assets/js/modules/cursor.js" defer></script>
 <script src="assets/js/main.js" defer></script>
 </head>
 <body>
@@ -122,32 +125,31 @@
 
   <!-- ============ selected work ============
        data-art     which drawing in project-art.js animates the preview
-       data-caption text on the floating preview card
-       data-cursor  label shown on the cursor blob -->
+       data-caption text on the floating preview card -->
   <section id="work" class="wrap">
     <div class="sec-head reveal"><h2>Selected work</h2><span class="label">2024 – 2026 · 5 of 23 repositories</span></div>
     <ul class="work-list">
-      <li class="row reveal"><a href="https://github.com/maxxqcty/openseat" target="_blank" rel="noopener" data-art="seats" data-caption="OpenSeat · FastAPI + React" data-cursor="Code ↗">
+      <li class="row reveal"><a href="https://github.com/maxxqcty/openseat" target="_blank" rel="noopener" data-art="seats" data-caption="OpenSeat · FastAPI + React">
         <span class="r-year mono">2026</span><span class="r-title">OpenSeat</span>
         <span class="r-meta r-role">Booking and waitlist app that fills cancelled seats automatically</span><span class="r-meta r-disc mono">FastAPI, React, Postgres</span>
         <svg class="r-arrow" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 11h14M12 5l6 6-6 6"/></svg>
         <canvas class="r-thumb" width="176" height="176" aria-hidden="true"></canvas></a></li>
-      <li class="row reveal"><a href="https://github.com/maxxqcty/Semantic-Scholar-PDF-Downloader" target="_blank" rel="noopener" data-art="papers" data-caption="Scholar Downloader · Python CLI" data-cursor="Code ↗">
+      <li class="row reveal"><a href="https://github.com/maxxqcty/Semantic-Scholar-PDF-Downloader" target="_blank" rel="noopener" data-art="papers" data-caption="Scholar Downloader · Python CLI">
         <span class="r-year mono">2026</span><span class="r-title">Scholar PDF Downloader</span>
         <span class="r-meta r-role">Searches Semantic Scholar and saves open-access papers with Excel metadata</span><span class="r-meta r-disc mono">Python, CLI</span>
         <svg class="r-arrow" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 11h14M12 5l6 6-6 6"/></svg>
         <canvas class="r-thumb" width="176" height="176" aria-hidden="true"></canvas></a></li>
-      <li class="row reveal"><a href="https://maxxqcty.github.io/BST-Visualizer/" target="_blank" rel="noopener" data-art="bst" data-caption="BST Visualizer · live demo" data-cursor="Demo ↗">
+      <li class="row reveal"><a href="https://maxxqcty.github.io/BST-Visualizer/" target="_blank" rel="noopener" data-art="bst" data-caption="BST Visualizer · live demo">
         <span class="r-year mono">2024</span><span class="r-title">BST Visualizer</span>
         <span class="r-meta r-role">Animates binary search tree insertion and search paths</span><span class="r-meta r-disc mono">JavaScript, D3</span>
         <svg class="r-arrow" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 11h14M12 5l6 6-6 6"/></svg>
         <canvas class="r-thumb" width="176" height="176" aria-hidden="true"></canvas></a></li>
-      <li class="row reveal"><a href="https://maxxqcty.github.io/AVL-Tree-Visualizer/" target="_blank" rel="noopener" data-art="avl" data-caption="AVL Tree Visualizer · live demo" data-cursor="Demo ↗">
+      <li class="row reveal"><a href="https://maxxqcty.github.io/AVL-Tree-Visualizer/" target="_blank" rel="noopener" data-art="avl" data-caption="AVL Tree Visualizer · live demo">
         <span class="r-year mono">2024</span><span class="r-title">AVL Tree Visualizer</span>
         <span class="r-meta r-role">Shows self-balancing rotations live in the DOM</span><span class="r-meta r-disc mono">JavaScript</span>
         <svg class="r-arrow" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 11h14M12 5l6 6-6 6"/></svg>
         <canvas class="r-thumb" width="176" height="176" aria-hidden="true"></canvas></a></li>
-      <li class="row reveal"><a href="https://github.com/maxxqcty/School-System-Crud" target="_blank" rel="noopener" data-art="table" data-caption="School System · PHP + MySQL" data-cursor="Code ↗">
+      <li class="row reveal"><a href="https://github.com/maxxqcty/School-System-Crud" target="_blank" rel="noopener" data-art="table" data-caption="School System · PHP + MySQL">
         <span class="r-year mono">2024</span><span class="r-title">School System CRUD</span>
         <span class="r-meta r-role">Student records with login, image uploads and owner-scoped queries</span><span class="r-meta r-disc mono">PHP, MySQL, Bootstrap</span>
         <svg class="r-arrow" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 11h14M12 5l6 6-6 6"/></svg>
@@ -159,7 +161,7 @@
   <section id="profile" class="wrap">
     <div class="sec-head reveal"><h2>Profile</h2><span class="label">English · Filipino · Cebuano</span></div>
     <div class="profile">
-      <p class="profile-lead reveal">Computer science student at Negros Oriental State University. I like building software end to end: a clear data model, a fast API, and an interface people can use without instructions.</p>
+      <p class="profile-lead reveal split">Computer science student at Negros Oriental State University. I like building software end to end: a clear data model, a fast API, and an interface people can use without instructions.</p>
       <div class="profile-body reveal">
         <p>With the Idealists’ Guild I build web apps and practise penetration testing in labs and security challenges.</p>
         <div class="stack">
@@ -288,7 +290,7 @@
   <section id="contact" class="wrap">
     <div class="sec-head reveal"><h2>Contact</h2><span class="label">Dumaguete City, Philippines · UTC+8</span></div>
     <div class="contact">
-      <p class="contact-big reveal">Have a web app or data tool <b>that needs building?</b></p>
+      <p class="contact-big reveal split">Have a web app or data tool <b>that needs building?</b></p>
       <!-- message form (contact.js validates it). Sending is not connected yet:
            see sendMessage() in contact.js for where a delivery service plugs in. -->
       <form class="msg-form reveal" id="msgForm" novalidate>
@@ -331,18 +333,6 @@
 <div class="preview" id="preview" aria-hidden="true"><canvas width="600" height="420"></canvas><span class="cap mono"></span></div>
 <div class="coords mono" id="coords" aria-hidden="true">X 0000 · Y 0000</div>
 <div class="toast mono" id="toast" role="status"></div>
-
-<div class="cur" id="cur" aria-hidden="true">
-  <svg class="cur-goo">
-    <defs><filter id="goo" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>
-      <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10"/>
-    </filter></defs>
-    <g filter="url(#goo)" id="curBlobs"></g>
-  </svg>
-  <div class="cur-label" id="curLabel">View</div>
-</div>
-<div class="cur-x" id="curX" aria-hidden="true"></div>
 
 </body>
 </html>

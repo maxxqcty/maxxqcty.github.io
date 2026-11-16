@@ -83,7 +83,6 @@
     s.text = s.name.toUpperCase();
     s.word = document.createElement('div');
     s.word.className = 'rw-word';
-    s.word.dataset.sec = s.el.id || 'top';   // hud.css colours each word by its section
     s.letters = [...s.text].map(ch => {
       const l = document.createElement('span');
       l.className = 'rw-ch';
@@ -91,6 +90,12 @@
       s.word.appendChild(l);
       return l;
     });
+    /* The word element itself never moves or resizes (that would cost a layout per frame):
+       letters are placed with transforms, and this 1px box is stretched over them with a
+       transform to give the word one unbroken click target. */
+    s.hit = document.createElement('span');
+    s.hit.className = 'rw-hit';
+    s.word.appendChild(s.hit);
     s.word.addEventListener('click', () => glideTo(Math.min(maxScroll(), anchorOf(i))));
     s.word.addEventListener('pointerenter', () => { hoverWord = i; });
     s.word.addEventListener('pointerleave', () => { if (hoverWord === i) hoverWord = -1; });
@@ -120,17 +125,47 @@
   function setMode() {
     on = fine.matches;
     root.dataset.ruler = on ? 'on' : 'off';
-    if (on && !canvas.isConnected) { document.body.append(canvas, layer); measureLetters(); measure(); }
+    if (on && !canvas.isConnected) { document.body.append(canvas, layer); measureLetters(); measure(); geom(); }
     if (!on && canvas.isConnected) { canvas.remove(); layer.remove(); }
   }
 
   const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
   const easeOut = x => 1 - Math.pow(1 - x, 3);
   const clamp01 = x => Math.min(1, Math.max(0, x));
-  const maxScroll = () => Math.max(1, root.scrollHeight - innerHeight);
+  const maxScroll = () => maxS;
+
+  /* writes a style only when its value changed, so resting headings cost nothing */
+  const styleCache = new WeakMap();
+  const put = (el, prop, val) => {
+    let c = styleCache.get(el);
+    if (!c) styleCache.set(el, c = {});
+    if (c[prop] === val) return;
+    c[prop] = val;
+    if (prop[0] === '-') el.style.setProperty(prop, val); else el.style[prop] = val;
+  };
 
   /* ---------- geometry of the rail ---------- */
   let W = RAIL_W, H = 0, dpr = 1, top = 0, span = 1, navB = 0;
+  /* Page geometry, measured on layout changes only (never per frame) and stored in page
+     coordinates, so a frame derives every viewport position from the scroll offset. */
+  let maxS = 1, geomDirty = true;
+  let portraitBox = null;   // { bottom, right } of the portrait in page coordinates
+  const pageTop = el => { let t = 0; for (; el; el = el.offsetParent) t += el.offsetTop; return t; };
+  function geom() {
+    const y = scrollY;
+    maxS = Math.max(1, root.scrollHeight - innerHeight);
+    sections.forEach(s => {
+      // where a section visibly starts: its separator rule (sections after the first), or its
+      // first content for the first section, which has no rule above it
+      // (a heading's position is summed from offsets, which ignore its scroll-reveal transform)
+      const viaHead = s.head && s.el.previousElementSibling?.tagName !== 'SECTION';
+      s.startY = viaHead ? pageTop(s.head) : s.el.getBoundingClientRect().top + y;
+      s.bottomY = s.el.getBoundingClientRect().bottom + y;
+    });
+    const pr = portrait && portrait.getBoundingClientRect();
+    portraitBox = pr ? { bottom: pr.bottom + y, right: pr.right } : null;
+    geomDirty = true;
+  }
   function measure() {
     dpr = Math.min(2, devicePixelRatio || 1);
     H = innerHeight;
@@ -140,27 +175,38 @@
     top = navB + EDGE_PAD;
     span = Math.max(1, H - EDGE_PAD - top);
   }
-  addEventListener('resize', () => { if (on) measure(); });
-  (document.fonts?.ready || Promise.resolve()).then(() => { if (on) measureLetters(); });
+  App.onLayout(() => { if (on) { measure(); geom(); } });
+  // letter widths depend on the heading face, which can arrive late (the font stylesheet is non-blocking)
+  const fontsChanged = () => { if (on) { measureLetters(); geomDirty = true; } };
+  (document.fonts?.ready || Promise.resolve()).then(fontsChanged);
+  document.fonts?.addEventListener?.('loadingdone', fontsChanged);
   fine.addEventListener?.('change', setMode);
   setMode();
   const yOf = p => top + p * span;
   const pOf = y => clamp01((y - top) / span);
 
   /* ---------- scrolling: click glide and drag scrub ---------- */
-  let jump = null, dragging = false, dragTarget = 0, dragStartY = 0, dragMoved = false;
-  function setScroll(y) {
-    root.style.scrollBehavior = 'auto';   // the page uses smooth scrolling for anchors; bypass it here
-    scrollTo(0, y);
-    root.style.scrollBehavior = '';
-  }
+  /* Glides run through Lenis (core.js) when it is available, so they share one easing
+     with wheel scrolling and a new wheel movement takes over cleanly. `jump` is the
+     built-in tween used only when Lenis is absent. */
+  let jump = null, gliding = false, dragging = false, dragTarget = 0, dragStartY = 0, dragMoved = false;
+  const setScroll = y => App.scrollTo(y, { immediate: true });
   function glideTo(y, dur) {
     const from = scrollY, dist = Math.abs(y - from);
     if (App.reduce || dist < 2) return setScroll(y);
-    jump = { from, to: y, t0: performance.now(), dur: dur || Math.min(JUMP_MAX, 350 + dist * .35) };
+    dur = dur || Math.min(JUMP_MAX, 350 + dist * .35);
+    if (App.lenis) {
+      gliding = true;
+      App.lenis.scrollTo(y, { duration: dur / 1000, easing: ease, onComplete: () => { gliding = false; } });
+    } else jump = { from, to: y, t0: performance.now(), dur };
   }
   // any wheel, key or touch input cancels a glide in progress
-  ['wheel', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, () => { jump = null; }, { passive: true }));
+  ['wheel', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, () => {
+    jump = null;
+    // Lenis lets the wheel take over by itself; keys and touch scroll natively, so stop its glide for them
+    if (gliding && ev !== 'wheel') setScroll(scrollY);
+    gliding = false;
+  }, { passive: true }));
 
   /* ---------- pointer on the rail ---------- */
   let hoverY = null;
@@ -177,7 +223,7 @@
     e.preventDefault();
     const y = e.clientY - canvas.getBoundingClientRect().top;
     canvas.setPointerCapture(e.pointerId);
-    dragging = true; jump = null; dragMoved = false; dragStartY = y;
+    dragging = true; jump = null; gliding = false; dragMoved = false; dragStartY = y;
     dragTarget = pOf(y) * maxScroll();
   });
   const endDrag = e => {
@@ -191,24 +237,18 @@
 
   /* ---------- section positions ---------- */
   const headH = () => (header ? header.offsetHeight : 0);
-  // scroll target for a section: its heading just below the nav
-  // where a section visibly starts: its separator rule (sections after the first), or its
-  // first content for the first section, which has no rule above it
-  const startOf = i => {
-    const s = sections[i];
-    return s.el.previousElementSibling?.tagName === 'SECTION' ? s.el.getBoundingClientRect().top : s.head.getBoundingClientRect().top;
-  };
+  // where a section starts in the viewport right now (from the cached page position, see geom())
+  const startOf = i => sections[i].startY - App.frame.scrollY;
   // the line a section's start must reach for its heading to be fully flipped in: just under
   // the full-size heading when the pile is full
   const flipLine = () => navB + TOP_PAD + MAX_PILE * SLOT + CURRENT_GAP + HEAD_PX / 2 + 10;
   // scroll target for a section: its start sitting on the flip line, heading just flipped in
-  const anchorOf = i => i === 0 ? 0 : Math.max(0, startOf(i) + scrollY - flipLine());
+  const anchorOf = i => i === 0 ? 0 : Math.max(0, sections[i].startY - flipLine());
 
   /* ---------- heading poses ----------
      A pose is where one letter sits: centre x/y, rotation, scale (of HEAD_PX), opacity. */
   const RIDE = RIDE_PX / HEAD_PX, QUEUE = QUEUE_PX / HEAD_PX;
   let X0 = 0;   // rail's left edge in viewport px
-  let colorsFor = null;   // token set the section colours were read for
   let currentIdx = 0;   // section whose heading is (mostly) flipped in, for the rail tick
   let halfFlip = null;   // progress of a half-done flip this frame, if any
   const flat = (s, j, y, scale, alpha) => ({
@@ -219,8 +259,8 @@
   });
 
   function placeWords() {
-    X0 = innerWidth - RAIL_W;
-    const vh = innerHeight, max = maxScroll(), y = scrollY;
+    X0 = App.frame.vw - RAIL_W;
+    const vh = App.frame.vh, max = maxScroll(), y = App.frame.scrollY;
     const A = navB + TOP_PAD;                         // first pile slot
     const L = flipLine();                             // where a section's start finishes its flip
     const I = vh - QUEUE_PAD;                         // lowest queue slot
@@ -240,7 +280,7 @@
       r.flipP = r.posFlip = clamp01((L + FLIP_ZONE - r.v) / FLIP_ZONE);
       // sections near the end can't scroll up to the flip line: flip them over the last stretch instead
       if (r.rawV + y - max > L) {
-        const bottom = sections[i].el.getBoundingClientRect().bottom + y;
+        const bottom = sections[i].bottomY;
         const start = Math.min(bottom - vh, max - 24), len = Math.max(24, max - start);
         r.flipP = Math.max(r.flipP, clamp01((y - start) / len));
       }
@@ -265,8 +305,8 @@
     // keep the queue off the portrait: hidden while the portrait reaches down into the
     // queue's corner, fading in as it scrolls up and clears it
     const queueTop = I - SLOT * (MAX_QUEUE - 1) - QUEUE_PX - 16;
-    const pr = portrait && portrait.getBoundingClientRect();
-    const clear = pr && pr.bottom > 0 && pr.right > X0 - 700 ? clamp01((queueTop - pr.bottom) / CLEAR_ZONE) : 1;
+    const pb = portraitBox ? portraitBox.bottom - y : 0;
+    const clear = portraitBox && pb > 0 && portraitBox.right > X0 - 700 ? clamp01((queueTop - pb) / CLEAR_ZONE) : 1;
 
     // top pile: count fully flipped words and how far the next one has got
     let full = 0, partial = 0, poolT = 0, poolB = 0, pileBottom = A;
@@ -318,8 +358,8 @@
         const rot = a.rot + (b.rot - a.rot) * d, sc = a.scale + (b.scale - a.scale) * d;
         const al = (hot ? 1 : a.alpha + (b.alpha - a.alpha) * d) * fade;
         const l = s.letters[j];
-        l.style.transform = `translate3d(${x.toFixed(1)}px, ${yy.toFixed(1)}px, 0) translate(-50%, -50%) rotate(${rot.toFixed(1)}deg) scale(${sc.toFixed(3)})`;
-        l.style.opacity = al.toFixed(3);
+        put(l, 'transform', `translate3d(${x.toFixed(1)}px, ${yy.toFixed(1)}px, 0) translate(-50%, -50%) rotate(${rot.toFixed(1)}deg) scale(${sc.toFixed(3)})`);
+        put(l, 'opacity', al.toFixed(3));
         const half = s.adv[j] * HEAD_PX * sc / 2 + 2, hh = HEAD_PX * sc / 2 + 2, turned = Math.abs(rot) > 45;
         const hx = turned ? hh : half, hy = turned ? half : hh;
         minX = Math.min(minX, x - hx); maxX = Math.max(maxX, x + hx);
@@ -327,27 +367,38 @@
         vis = Math.max(vis, al);
       }
       s.word.classList.toggle('is-hot', hot);
-      // the word's own box is its click target, sized to the letters' current spread
-      Object.assign(s.word.style, { left: minX + 'px', top: minY + 'px', width: (maxX - minX) + 'px', height: (maxY - minY) + 'px' });
-      s.word.style.setProperty('--ox', -minX + 'px'); s.word.style.setProperty('--oy', -minY + 'px');
-      s.word.style.pointerEvents = vis > .05 && maxY > 0 && minY < vh ? 'auto' : 'none';
+      // the click target covers the letters' current spread
+      put(s.hit, 'transform', `translate(${minX.toFixed(1)}px, ${minY.toFixed(1)}px) scale(${(maxX - minX).toFixed(1)}, ${(maxY - minY).toFixed(1)})`);
+      put(s.word, 'pointerEvents', vis > .05 && maxY > 0 && minY < vh ? 'auto' : 'none');
     });
 
-    poolTop.style.opacity = poolT;
-    poolTop.style.top = navB + 'px';
-    poolTop.style.height = (pileBottom - navB + 40) + 'px';
-    poolBot.style.opacity = poolB;
-    poolBot.style.height = (vh - (I - SLOT * (MAX_QUEUE - 1)) + 50) + 'px';
+    put(poolTop, 'opacity', poolT.toFixed(3));
+    put(poolTop, 'top', navB + 'px');
+    put(poolTop, 'height', Math.round(pileBottom - navB + 40) + 'px');
+    put(poolBot, 'opacity', poolB.toFixed(3));
+    put(poolBot, 'height', (vh - (I - SLOT * (MAX_QUEUE - 1)) + 50) + 'px');
   }
 
   /* ---------- per frame ---------- */
   const t0 = performance.now();
   let lastY = scrollY, vel = 0, lastT = t0, lastSeenY = scrollY, restSince = t0;
+  let shownHoverY = null, shownHoverWord = -1, snapTried = false;
+  const INTRO_END = 250 + 100 * INTRO_STAGGER + INTRO_DUR + 100;   // ms until the last tick has drawn in
 
   App.onFrame(() => {
     if (!on) return;
     const now = performance.now(), dt = Math.min(.1, (now - lastT) / 1000) || .016;
     lastT = now;
+
+    /* At rest the rail and headings are already drawn: skip the whole frame unless something
+       that feeds them changed (scroll, layout, theme, hover, a glide or drag, the intro, the
+       tick stretch still relaxing, or a half-done flip waiting to resolve). */
+    const f = App.frame;
+    const waitingToSnap = halfFlip != null && !snapTried;
+    if (!(f.scrolled || f.themed || geomDirty || jump || dragging || waitingToSnap ||
+          hoverY !== shownHoverY || hoverWord !== shownHoverWord ||
+          now - t0 < INTRO_END || Math.abs(vel) > 1)) return;
+    geomDirty = false; shownHoverY = hoverY; shownHoverWord = hoverWord;
 
     // drive scrolling first so the needle matches this frame
     if (jump) {
@@ -358,25 +409,27 @@
       const y = scrollY + (dragTarget - scrollY) * (App.reduce ? 1 : DRAG_LERP);
       setScroll(Math.abs(dragTarget - y) < .5 ? dragTarget : y);
     }
+    // a glide or drag just moved the page: bring the shared scroll position up to date
+    const sy = f.scrollY = window.scrollY;
 
     placeWords();
 
     // track scroll rest; finish a half-done flip in whichever direction is closer
-    if (scrollY !== lastSeenY) { lastSeenY = scrollY; restSince = now; }
-    if (halfFlip != null && !jump && !dragging && now - restSince > SNAP_DELAY) {
+    if (sy !== lastSeenY) { lastSeenY = sy; restSince = now; snapTried = false; }
+    if (gliding && App.lenis && !App.lenis.isScrolling) gliding = false;   // a glide that was replaced never reports completion
+    if (halfFlip != null && !snapTried && !jump && !gliding && !dragging && now - restSince > SNAP_DELAY) {
       // flip progress grows 1:1 with scroll over FLIP_ZONE px
       const delta = halfFlip >= .5 ? (1 - halfFlip) * FLIP_ZONE : -halfFlip * FLIP_ZONE;
-      glideTo(Math.min(maxScroll(), Math.max(0, scrollY + delta + Math.sign(delta))), SNAP_DUR);
+      snapTried = true;   // one attempt per rest: if the page cannot move there (page end), do not retry every frame
+      glideTo(Math.min(maxScroll(), Math.max(0, sy + delta + Math.sign(delta))), SNAP_DUR);
     }
 
-    const max = maxScroll(), progress = clamp01(scrollY / max);
-    const v = (scrollY - lastY) / dt; lastY = scrollY;
+    const max = maxScroll(), progress = clamp01(sy / max);
+    const v = (sy - lastY) / dt; lastY = sy;
     vel += (v - vel) * (1 - Math.exp(-6 * dt));
     const speed = App.reduce ? 0 : Math.min(1, Math.abs(vel) / 4000);
 
     const c = App.tokens();
-    // each section's colour, re-read when the theme changes (tokens() returns a new object then)
-    if (c !== colorsFor) { colorsFor = c; sections.forEach(s => { s.color = getComputedStyle(s.el).getPropertyValue('--accent').trim() || c.accent; }); }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
     const needleY = yOf(progress);
@@ -412,7 +465,7 @@
       if (intro <= 0) return;
       const ty = Math.round(yOf(p)) + .5;
       ctx.globalAlpha = (i === current ? 1 : .55) * intro;
-      ctx.strokeStyle = s.color || c.accent;
+      ctx.strokeStyle = c.accent;
       ctx.beginPath(); ctx.moveTo(W, ty); ctx.lineTo(W - SECTION_LEN * intro, ty); ctx.stroke();
     });
 
@@ -431,7 +484,7 @@
     if (needleA > 0) {
       const ny = Math.round(needleY);
       ctx.globalAlpha = needleA;
-      ctx.fillStyle = sections[current].color || c.accent;
+      ctx.fillStyle = c.accent;
       ctx.fillRect(24, ny - 1, W - 24, 2);
       ctx.beginPath(); ctx.moveTo(24, ny - 4); ctx.lineTo(30, ny); ctx.lineTo(24, ny + 4); ctx.closePath(); ctx.fill();
       ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';

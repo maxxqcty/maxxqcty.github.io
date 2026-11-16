@@ -12,8 +12,13 @@
   ext.className = 'grid-ext';
   host.appendChild(ext);
 
+  let builtFor = '';
   function build() {
     const cols = App.$$('.grid-bg .wrap span').map(s => s.getBoundingClientRect()).filter(r => r.width > 0);
+    // skip when the columns sit exactly where they did last time (most layout signals don't move them)
+    const sig = cols.length < 2 ? '' : [cols.length, cols[0].left, cols[0].width, cols[1].left, innerWidth].join();
+    if (sig === builtFor && sig) return;
+    builtFor = sig;
     ext.textContent = '';
     if (cols.length < 2) return;
 
@@ -35,7 +40,5 @@
   }
 
   build();
-  (document.fonts?.ready || Promise.resolve()).then(build);
-  let t;
-  addEventListener('resize', () => { clearTimeout(t); t = setTimeout(build, 100); });
+  App.onLayout(build);
 })(window.MAE);

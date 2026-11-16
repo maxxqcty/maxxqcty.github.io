@@ -27,7 +27,7 @@
 }
 .btn svg { flex: none; transition: transform .45s var(--ease); }
 .btn-solid { background: var(--ink); color: var(--paper); }
-.btn-solid:hover, .btn-solid:focus-visible { background: var(--accent); color: var(--on-accent); }
+.btn-solid:hover, .btn-solid:focus-visible { background: var(--lime); color: var(--on-accent); }
 .btn-solid:hover svg { transform: translateY(3px); }
 .btn-line { border-color: color-mix(in srgb, var(--ink) 30%, transparent); color: var(--ink); background: color-mix(in srgb, var(--paper) 70%, transparent); }
 .btn-line:hover, .btn-line:focus-visible { border-color: var(--ink); background: var(--ink); color: var(--paper); }
@@ -69,8 +69,8 @@
 .statement em { font-style: normal; color: var(--accent); }
 
 .avail { display: flex; align-items: center; gap: 10px; }
-.dot { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--accent); position: relative; }
-.dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--accent); animation: dot-ping 2.2s var(--ease) infinite; }
+.dot { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--lime); position: relative; }
+.dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--lime); animation: dot-ping 2.2s var(--ease) infinite; }
 @keyframes dot-ping { to { transform: scale(3.2); opacity: 0; } }
 
 /* ---------- portrait: transparent cutout standing in front of an accent disc ---------- */
@@ -78,7 +78,7 @@
 .portrait::after { content: ""; position: absolute; left: -4%; right: -4%; bottom: 0; height: 1px; background: var(--ink); }
 .portrait .disc {
   position: absolute; left: 12%; right: 12%; top: 14%; aspect-ratio: 1; z-index: -1;
-  border-radius: 50%; background: var(--accent); animation: disc-grow 1.3s var(--ease) .5s both;
+  border-radius: 50%; background: var(--lime); animation: disc-grow 1.3s var(--ease) .5s both;
 }
 .portrait .ring {
   position: absolute; left: 4%; right: 4%; top: 6%; aspect-ratio: 1; z-index: -2;

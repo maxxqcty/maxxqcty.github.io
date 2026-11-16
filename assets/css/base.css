@@ -4,7 +4,14 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* Anchor links glide. With Lenis running (core.js) it does the gliding for wheel, anchors
+   and the scroll ruler alike, so the browser's own smoothing is switched off to keep the
+   two from fighting; without it (reduced motion aside) the native smoothing below applies. */
 html { scroll-behavior: smooth; }
+html.lenis { scroll-behavior: auto !important; }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
 
 body {
   margin: 0;
@@ -24,7 +31,7 @@ body::before {
 
 a { color: inherit; }
 img { max-width: 100%; }
-::selection { background: var(--accent); color: var(--on-accent); }
+::selection { background: var(--lime); color: var(--on-accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
 
 /* ---------- utilities ---------- */

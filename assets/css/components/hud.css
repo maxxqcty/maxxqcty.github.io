@@ -29,25 +29,21 @@ html[data-ruler="on"] body { padding-right: var(--rail-w); }
 }
 
 /* ---------- section headings that ride the rail and flip to the top ----------
-   scroll-ruler.js positions every letter (.rw-ch) in viewport px; each word's
-   own box only serves as its click target, so letters are offset back by it. */
+   scroll-ruler.js positions every letter (.rw-ch) in viewport px with a transform.
+   The word element stays an empty box at the corner; .rw-hit is its click target,
+   stretched over the letters with a transform (so nothing here triggers layout). */
 .ruler-words { position: fixed; inset: 0; z-index: 27; pointer-events: none; }
 .rw-word {
-  position: absolute; cursor: pointer; color: var(--ink); white-space: pre;
+  position: absolute; left: 0; top: 0; width: 0; height: 0; cursor: pointer; color: var(--ink); white-space: pre;
   /* Archivo at weight 620, 118% width, as on the reference site; letter positions are measured in this exact style */
   font: 620 34px/1 "Archivo", var(--f-display); font-stretch: 118%; letter-spacing: 0;
   transition: color .25s;
 }
-/* each heading in its section's colour; the intro and contact stay ink */
-.rw-word[data-sec="work"] { color: var(--c-work); }
-.rw-word[data-sec="profile"] { color: var(--c-profile); }
-.rw-word[data-sec="languages"] { color: var(--c-languages); }
-.rw-word[data-sec="record"] { color: var(--c-record); }
-.rw-word[data-sec="certs"] { color: var(--c-certs); }
-.rw-word[data-sec="offclock"] { color: var(--c-offclock); }
+/* headings are ink; the one under the pointer takes the accent */
 .rw-word.is-hot { color: var(--accent); }
-.rw-ch { position: absolute; left: var(--ox, 0); top: var(--oy, 0); display: block; will-change: transform, opacity; }
-.rw-measure { left: -9999px; top: 0; visibility: hidden; font-size: 100px; cursor: default; }
+.rw-ch { position: absolute; left: 0; top: 0; display: block; }
+.rw-hit { position: absolute; left: 0; top: 0; width: 1px; height: 1px; transform-origin: 0 0; }
+.rw-measure { left: -9999px; top: 0; width: auto; height: auto; visibility: hidden; font-size: 100px; cursor: default; }
 
 /* with the ruler on, the rail carries the large headings, so the section heading rows
    in the page shrink to a compact line: small title + number tag, no rule of their own
@@ -70,7 +66,7 @@ html[data-ruler="on"] .sec-head:hover h2 { font-variation-settings: "wght" 760, 
 /* section separators (ruler on only, since the heading rows are compact then):
    a full-width ink rule with end ticks, like the rail. The section number is shown by the
    heading's own tag, so the separator's number (::after below) is switched off. */
-html[data-ruler="on"] main { counter-reset: sep 1; }
+html[data-ruler="on"] main { counter-reset: sec 1 sep 1; }   /* restate `sec` (layout.css): a second counter-reset replaces the first, which left every heading tag at 01 */
 html[data-ruler="on"] main > section { counter-increment: sep; }
 html[data-ruler="on"] main > section + section { position: relative; padding-top: clamp(40px, 4.5vw, 64px); }
 html[data-ruler="on"] main > section + section::before {

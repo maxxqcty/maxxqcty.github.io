@@ -1,0 +1,56 @@
+/* ==========================================================================
+   Motion: staggered reveals and the small interactive touches driven by
+   motion.js. Everything here animates transform, translate, scale, opacity or
+   clip-path only, so none of it triggers layout. Reduced motion switches all
+   of it off (base.css).
+   ========================================================================== */
+
+/* ---------- scroll reveal, staggered ----------
+   reveal.js hides (.wait) only what is still below the screen, then swaps in .in with a
+   per-item delay (--d) so rows that arrive together cascade. */
+.reveal.wait { opacity: 0 !important; }   /* beats the quieter heading rows in hud.css */
+.reveal.in { animation: reveal-up .9s var(--ease) var(--d, 0s) both; }
+@keyframes reveal-up { from { opacity: 0; transform: translateY(28px); } }
+.lang.in .lang-fill { animation-delay: calc(var(--d, 0s) + .15s); }
+
+/* ---------- split words: each word rises out of its own clipped slot ----------
+   clip-path (not overflow) does the clipping, so the text's baseline and wrapping
+   stay exactly as they were. */
+.split .w { display: inline-block; clip-path: inset(-.1em -.05em -.18em -.05em); }
+.split .w > span { display: inline-block; }
+.split.in { animation: none; }
+.split.in .w > span { animation: word-up .95s var(--ease) calc(var(--d, 0s) + var(--w) * 26ms) both; }
+@keyframes word-up { from { transform: translateY(115%); } }
+
+/* ---------- header: the section you are in ---------- */
+.nav a.is-current::after { transform: scaleX(1); transform-origin: left; height: 2px; background: var(--accent); }
+
+/* ---------- press feedback ---------- */
+.btn:active, .icon-link:active, .theme-btn:active, .copy-btn:active, .mag:active { scale: .95; }
+
+/* ---------- portrait: the disc swells a little under the pointer ---------- */
+.portrait .disc { transition: scale .8s var(--ease); }
+.portrait:hover .disc { scale: 1.05; }
+
+/* ---------- stack chips: lime on hover, with a small lift ---------- */
+.tools li { transition: background .3s, color .3s, border-color .3s, translate .45s var(--ease); }
+.tools li:hover { background: var(--lime); color: var(--on-accent); border-color: var(--lime); translate: 0 -2px; }
+
+/* ---------- record rows: slide with a lime marker (translate, where it used to animate padding) ---------- */
+.record li { position: relative; transition: translate .45s var(--ease); }
+.record li:hover { padding-left: 0; translate: 12px 0; }
+.record li::before {
+  content: ""; position: absolute; left: -14px; top: 50%; width: 6px; height: 6px; margin-top: -3px;
+  background: var(--lime); scale: 0; transition: scale .45s var(--ease);
+}
+.record li:hover::before { scale: 1; }
+
+/* ---------- posters and covers: tilt (motion.js sets the transform) and a glare ---------- */
+.media-art::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .4s;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, .3), transparent 55%);
+}
+.media-card:hover .media-art::after { opacity: 1; }
+@media (hover: hover) and (pointer: fine) {
+  .media-card:hover .media-art { transition-duration: .25s, .6s; }   /* follow the pointer closely, settle slowly */
+}
