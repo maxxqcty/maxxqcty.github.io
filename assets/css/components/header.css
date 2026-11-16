@@ -10,8 +10,8 @@
 }
 .top .wrap { display: flex; align-items: center; gap: 24px; padding-block: 14px; }
 
-/* logo (assets/images/icons/logo.svg, inlined): "MA" as two white peaks with a lime star in
-   the A, on a black tile. Its colours are fixed, so it looks the same in both themes; the
+/* logo (assets/images/icons/logo.svg, inlined): "MA" as one flowing two-peaked shape with a lime
+   star in the A, on a black tile. Its colours are fixed, so it looks the same in both themes; the
    hairline ring keeps the tile's edge visible on the dark page. The star pops in on load and
    turns on hover. */
 .mark { flex: none; display: block; width: 38px; height: 38px; border-radius: 9px; box-shadow: 0 0 0 1px var(--line); transition: scale .45s var(--ease); }

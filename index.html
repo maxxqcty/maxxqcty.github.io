@@ -61,15 +61,14 @@
 
 <!-- ============ loading curtain (loader.css; shown only while html.loading, set by theme.js) ============ -->
 <div class="loader" aria-hidden="true">
-  <svg class="loader-logo" viewBox="12 1 100 100">
-    <g>
-      <clipPath id="loaderClip"><rect width="124" height="88"/></clipPath>
-      <g clip-path="url(#loaderClip)" fill="none" stroke="#FAFAFA" stroke-width="13" stroke-miterlimit="10">
-        <path class="logo-m" d="M26.1 96 46 40 65.9 96" pathLength="1"/>
-        <path class="logo-a" d="M54 96 76 34 98 96" pathLength="1"/>
-      </g>
-      <path class="logo-star" d="M76 44Q77.8 62.9 93 64.5Q77.8 66.1 76 85Q74.2 66.1 59 64.5Q74.2 62.9 76 44Z" fill="#A3E635" stroke="#0A0A0A" stroke-width="2.2" stroke-linejoin="round"/>
+  <svg class="loader-logo" viewBox="0 0 122 100">
+    <g class="logo-body">
+      <path fill="#FAFAFA" d="M4 88C20 85 27 70 40 28L54 58 73 12 97 62C102 76 108 85 118 88Z"/>
+      <path fill="#0A0A0A" d="M24 88C26 72 33 63 40 63C47 63 51 74 50 88Z"/>
+      <path fill="#0A0A0A" d="M62 88C60 70 67 58 77 58C87 58 93 72 92 88Z"/>
+      <path fill="#0A0A0A" d="M56 50C66 47 80 47 96 54L97 58C82 51 68 51 57 54Z"/>
     </g>
+    <path class="logo-star" fill="#A3E635" d="M77 57Q78.4 70 90 71.5Q78.4 73 77 86Q75.6 73 64 71.5Q75.6 70 77 57Z"/>
   </svg>
   <div class="loader-diamond"></div>
 </div>
@@ -86,15 +85,16 @@
 <!-- ============ header ============ -->
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="#top" aria-label="Maximilian Axel Enolpe, back to top"><svg viewBox="12 1 100 100" aria-hidden="true">
-      <rect x="12" y="1" width="100" height="100" rx="22" fill="#0A0A0A"/>
-      <g transform="translate(62 51) scale(.8) translate(-62 -51)">
-        <clipPath id="logoClip"><rect width="124" height="88"/></clipPath>
-        <g clip-path="url(#logoClip)" fill="none" stroke="#FAFAFA" stroke-width="13" stroke-miterlimit="10">
-          <path class="logo-m" d="M26.1 96 46 40 65.9 96" pathLength="1"/>
-          <path class="logo-a" d="M54 96 76 34 98 96" pathLength="1"/>
+    <a class="mark" href="#top" aria-label="Maximilian Axel Enolpe, back to top"><svg viewBox="-4 -15 130 130" aria-hidden="true">
+      <rect x="-4" y="-15" width="130" height="130" rx="29" fill="#0A0A0A"/>
+      <g transform="translate(61 50) scale(.94) translate(-61 -50)">
+        <g class="logo-body">
+          <path fill="#FAFAFA" d="M4 88C20 85 27 70 40 28L54 58 73 12 97 62C102 76 108 85 118 88Z"/>
+          <path fill="#0A0A0A" d="M24 88C26 72 33 63 40 63C47 63 51 74 50 88Z"/>
+          <path fill="#0A0A0A" d="M62 88C60 70 67 58 77 58C87 58 93 72 92 88Z"/>
+          <path fill="#0A0A0A" d="M56 50C66 47 80 47 96 54L97 58C82 51 68 51 57 54Z"/>
         </g>
-        <path class="logo-star" d="M76 44Q77.8 62.9 93 64.5Q77.8 66.1 76 85Q74.2 66.1 59 64.5Q74.2 62.9 76 44Z" fill="#A3E635" stroke="#0A0A0A" stroke-width="2.2" stroke-linejoin="round"/>
+        <path class="logo-star" fill="#A3E635" d="M77 57Q78.4 70 90 71.5Q78.4 73 77 86Q75.6 73 64 71.5Q75.6 70 77 57Z"/>
       </g>
     </svg></a>
     <nav class="nav" aria-label="Main">
